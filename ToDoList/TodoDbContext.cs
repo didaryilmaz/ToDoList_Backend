@@ -19,7 +19,7 @@ namespace ToDoList
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=todolistDb;Username=postgres;Password=ddrylmz");
+                optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=toDoListDb;Username=postgres;Password=ddrylmz");
             }
         }
     }
