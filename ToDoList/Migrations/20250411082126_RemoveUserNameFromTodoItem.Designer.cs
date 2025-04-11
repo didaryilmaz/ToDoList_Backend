@@ -12,8 +12,8 @@ using ToDoList;
 namespace ToDoList.Migrations
 {
     [DbContext(typeof(TodoDbContext))]
-    [Migration("20250409134352_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250411082126_RemoveUserNameFromTodoItem")]
+    partial class RemoveUserNameFromTodoItem
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -47,10 +47,6 @@ namespace ToDoList.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
                     b.HasIndex("UserId");
@@ -77,18 +73,16 @@ namespace ToDoList.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("User");
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("TodoListApp.Models.TodoItem", b =>
                 {
-                    b.HasOne("TodoListApp.Models.User", "User")
+                    b.HasOne("TodoListApp.Models.User", null)
                         .WithMany("ToDoItems")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("TodoListApp.Models.User", b =>

@@ -11,11 +11,7 @@ namespace TodoListApp.Models
         [MaxLength(255)]
         public string? Name { get; set; }  
         public bool IsCompleted { get; set; }  
-
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
         public int UserId { get; set; }  // Foreign key for the User table
-        public string UserName { get; set; } = string.Empty;
-        public User? User { get; set; }  // Navigation property to the User table
     }
 }

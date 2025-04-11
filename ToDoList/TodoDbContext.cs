@@ -14,6 +14,7 @@ namespace ToDoList
         }
         public TodoDbContext() { }
         public DbSet<TodoItem> Yapılacaklar { get; set; }
+        public DbSet<User> Users { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

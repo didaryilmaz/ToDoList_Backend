@@ -1,13 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens; 
-using System;
-using System.Collections.Generic;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Claims; 
-using System.Text; 
-using ToDoList.DTO; 
+using System.Security.Claims;
+using System.Text;
+using ToDoList.DTO;
+using TodoListApp.Models;
 
 namespace ToDoList.Controllers
 {
@@ -15,38 +14,50 @@ namespace ToDoList.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private static List<UserDto> users = new List<UserDto>();
-
         private readonly IConfiguration _configuration;
+        private readonly TodoDbContext _context;
 
-        public AuthController(IConfiguration configuration)
+        public AuthController(IConfiguration configuration, TodoDbContext context)
         {
             _configuration = configuration;
+            _context = context;
         }
 
         [HttpPost("register")]
-        public IActionResult Register([FromBody] UserDto request)
+        public async Task<IActionResult> Register([FromBody] UserDto request)
         {
-            var existingUser = users.FirstOrDefault(u => u.Username == request.Username);
+            var existingUser = await _context.Users
+                .FirstOrDefaultAsync(u => u.Username == request.Username);
+
             if (existingUser != null)
             {
-                return BadRequest("Bu kullanıcı adı zaten kullanılıyor.");
+            return BadRequest($"{request.Username}Bu kullanıcı adı zaten kullanılıyor.");
             }
 
-            users.Add(new UserDto
+            var user = new User
             {
                 Username = request.Username,
                 Password = request.Password 
-            });
+            };
+
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
 
             return Ok("Kayıt başarılı");
         }
 
-        [HttpPost("login")]
-        public IActionResult Login([FromBody] UserDto request)
+        [HttpGet("getAll")]
+        public async Task<IActionResult> GetAll()
         {
-            var user = users.FirstOrDefault(u => 
-                u.Username == request.Username && u.Password == request.Password);
+            var users = await _context.Users.ToListAsync();
+            return Ok(users);
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] UserDto request)
+        {
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Username == request.Username && u.Password == request.Password);
 
             if (user == null)
             {
@@ -57,20 +68,19 @@ namespace ToDoList.Controllers
             return Ok(new { token });
         }
 
-        private string GenerateToken(UserDto user)
+        private string GenerateToken(User user)
         {
             var claims = new[]
             {
                 new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Role, "User")
+                new Claim(ClaimTypes.Role, "User"),
+                new Claim("userId", user.Id.ToString()) 
             };
 
-            var keyString = _configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key appsettings.json içinde tanımlı değil.");
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyString));
-
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+                _configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key eksik")));
 
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
 
             var token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],
@@ -82,5 +92,6 @@ namespace ToDoList.Controllers
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
     }
 }

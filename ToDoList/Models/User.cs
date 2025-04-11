@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -10,11 +9,11 @@ namespace TodoListApp.Models
 
         [Required]
         [MaxLength(100)]
-        public string? Username { get; set; }
+        public string Username { get; set; } = string.Empty;
 
         [Required]
-        public string? Password { get; set; }
+        public string Password { get; set; } = string.Empty;
 
-        public List<TodoItem> ToDoItems { get; set; } = new List<TodoItem>();
+        public List<TodoItem> ToDoItems { get; set; } = new();
     }
 }

@@ -20,25 +20,17 @@ namespace ToDoList.Controllers
             _context = context;
         }
 
-        private string GetUsername()
-        {
-            return User.Identity?.Name ?? "";
-        }
-
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TodoItem>>> Get()
         {
-            var username = GetUsername();
-            return await _context.Yapılacaklar
-                                 .Where(t => t.UserName == username)
-                                 .ToListAsync();
+            return await _context.Yapılacaklar.ToListAsync();
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<TodoItem>> Get(int id)
         {
             var todoItem = await _context.Yapılacaklar.FindAsync(id);
-            if (todoItem == null || todoItem.UserName != GetUsername())
+            if (todoItem == null)
             {
                 return NotFound();
             }
@@ -47,19 +39,29 @@ namespace ToDoList.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<TodoItem>> Post([FromBody] TodoItem todoItem)
+        public async Task<IActionResult> Post([FromBody] TodoItem todoItem)
         {
             if (string.IsNullOrWhiteSpace(todoItem.Name))
             {
                 return BadRequest(new { message = "Görev adı boş olamaz." });
             }
 
-            todoItem.UserName = GetUsername();
+            var user = await _context.Users.FindAsync(todoItem.UserId);
+            if (user == null)
+            {
+                return BadRequest("Geçersiz kullanıcı ID'si.");
+            }
+
+            todoItem.CreatedAt = DateTime.UtcNow;
+
             _context.Yapılacaklar.Add(todoItem);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(Get), new { id = todoItem.Id }, todoItem);
         }
+
+
+
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, [FromBody] TodoItem todoItem)
@@ -68,12 +70,11 @@ namespace ToDoList.Controllers
                 return BadRequest();
 
             var existingTodo = await _context.Yapılacaklar.AsNoTracking()
-                .FirstOrDefaultAsync(t => t.Id == id && t.UserName == GetUsername());
+                .FirstOrDefaultAsync(t => t.Id == id);
 
             if (existingTodo == null)
                 return NotFound();
 
-            todoItem.UserName = GetUsername();
             _context.Entry(todoItem).State = EntityState.Modified;
 
             await _context.SaveChangesAsync();
@@ -83,8 +84,7 @@ namespace ToDoList.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var todoItem = await _context.Yapılacaklar
-                .FirstOrDefaultAsync(t => t.Id == id && t.UserName == GetUsername());
+            var todoItem = await _context.Yapılacaklar.FindAsync(id);
 
             if (todoItem == null)
                 return NotFound();
