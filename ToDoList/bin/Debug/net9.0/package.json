@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@ag-grid-community/client-side-row-model": "^32.3.5"
+  }
+}

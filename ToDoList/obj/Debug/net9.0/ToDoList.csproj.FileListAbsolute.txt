@@ -407,3 +407,5 @@
 /Users/didaryilmaz/Documents/GitHub/ToDoList_Backend/ToDoList/bin/Debug/net9.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
 /Users/didaryilmaz/Documents/GitHub/ToDoList_Backend/ToDoList/bin/Debug/net9.0/Microsoft.IdentityModel.Tokens.dll
 /Users/didaryilmaz/Documents/GitHub/ToDoList_Backend/ToDoList/bin/Debug/net9.0/System.IdentityModel.Tokens.Jwt.dll
+/Users/didaryilmaz/Documents/GitHub/ToDoList_Backend/ToDoList/bin/Debug/net9.0/package-lock.json
+/Users/didaryilmaz/Documents/GitHub/ToDoList_Backend/ToDoList/bin/Debug/net9.0/package.json

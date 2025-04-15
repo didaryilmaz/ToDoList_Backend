@@ -94,5 +94,38 @@ namespace ToDoList.Controllers
 
             return NoContent();
         }
+
+        [AllowAnonymous]
+        [HttpGet("all")]
+        public async Task<IActionResult> GetAllTodos([FromQuery] string title = "", [FromQuery] bool? completed = null, [FromQuery] int page = 0, [FromQuery] int size = 20)
+        {
+            var query = _context.Yapılacaklar.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(title))
+            {
+                query = query.Where(t => t.Name.Contains(title));
+            }
+
+            if (completed.HasValue)
+            {
+                query = query.Where(t => t.IsCompleted == completed.Value);
+            }
+
+            var totalCount = await query.CountAsync();
+
+            var todos = await query
+                .OrderByDescending(t => t.CreatedAt)
+                .Skip(page * size)
+                .Take(size)
+                .ToListAsync();
+
+            return Ok(new
+            {
+                totalCount,
+                todos
+            });
+        }
+
+
     }
 }
