@@ -65,9 +65,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseRouting();
 
-// Auth middleware'lerini doğru sırayla ekle!
 app.UseCors("AllowReactApp");
-app.UseAuthentication(); // <-- Burası önemli!
+app.UseAuthentication(); 
 app.UseAuthorization();
 
 app.MapControllers();

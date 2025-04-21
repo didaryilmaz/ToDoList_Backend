@@ -84,7 +84,7 @@ public async Task<IActionResult> Login([FromBody] UserDto request)
             var claims = new[]
             {
                 new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Role, user.Role.ToString()), // burası önemli
+                new Claim(ClaimTypes.Role, user.Role.ToString()), 
                 new Claim("userId", user.Id.ToString()) 
             };
 
