@@ -3,6 +3,12 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TodoListApp.Models
 {
+    public enum UserRole
+    {
+        Admin = 1,
+        User = 2
+    }
+
     public class User
     {
         public int Id { get; set; }
@@ -15,5 +21,8 @@ namespace TodoListApp.Models
         public string Password { get; set; } = string.Empty;
 
         public List<TodoItem> ToDoItems { get; set; } = new();
+
+        [Required]
+        public UserRole Role { get; set; }
     }
 }

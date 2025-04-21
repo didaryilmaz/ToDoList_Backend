@@ -12,8 +12,8 @@ using ToDoList;
 namespace ToDoList.Migrations
 {
     [DbContext(typeof(TodoDbContext))]
-    [Migration("20250411082126_RemoveUserNameFromTodoItem")]
-    partial class RemoveUserNameFromTodoItem
+    [Migration("20250420121432_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,7 @@ namespace ToDoList.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("TodoListApp.Models.TodoItem", b =>
+            modelBuilder.Entity("TodoItem", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -40,9 +40,11 @@ namespace ToDoList.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("Name")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Title")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("text");
 
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
@@ -66,6 +68,9 @@ namespace ToDoList.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("Role")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -76,13 +81,15 @@ namespace ToDoList.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("TodoListApp.Models.TodoItem", b =>
+            modelBuilder.Entity("TodoItem", b =>
                 {
-                    b.HasOne("TodoListApp.Models.User", null)
+                    b.HasOne("TodoListApp.Models.User", "User")
                         .WithMany("ToDoItems")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("TodoListApp.Models.User", b =>

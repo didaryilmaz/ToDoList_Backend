@@ -20,11 +20,25 @@ namespace ToDoList.Controllers
             _context = context;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<TodoItem>>> Get()
+        [HttpGet("mytodos")]
+        public async Task<ActionResult<IEnumerable<TodoItem>>> GetMyTodos()
         {
-            return await _context.Yapılacaklar.ToListAsync();
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "userId");
+            if (userIdClaim == null)
+            {
+                return Unauthorized();
+            }
+
+            int userId = int.Parse(userIdClaim.Value);
+
+            var myTodos = await _context.Yapılacaklar
+                .Where(t => t.UserId == userId)
+                .OrderByDescending(t => t.CreatedAt)
+                .ToListAsync();
+
+            return Ok(myTodos);
         }
+
 
         [HttpGet("{id}")]
         public async Task<ActionResult<TodoItem>> Get(int id)
@@ -63,7 +77,7 @@ namespace ToDoList.Controllers
 
 
 
-        [HttpPut("{id}")]
+        [HttpPut("mytodos/{id}")]
         public async Task<IActionResult> Put(int id, [FromBody] TodoItem todoItem)
         {
             if (id != todoItem.Id)
@@ -81,7 +95,7 @@ namespace ToDoList.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("mytodos/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             var todoItem = await _context.Yapılacaklar.FindAsync(id);
@@ -95,7 +109,7 @@ namespace ToDoList.Controllers
             return NoContent();
         }
 
-        [AllowAnonymous]
+        [Authorize(Roles = "Admin")]
         [HttpGet("all")]
         public async Task<IActionResult> GetAllTodos([FromQuery] string title = "", [FromQuery] bool? completed = null, [FromQuery] int page = 0, [FromQuery] int size = 20)
         {

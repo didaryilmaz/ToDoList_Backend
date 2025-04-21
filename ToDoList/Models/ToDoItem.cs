@@ -1,17 +1,17 @@
-using System;
-using System.ComponentModel.DataAnnotations;
+using TodoListApp.Models;
 
-namespace TodoListApp.Models
+public class TodoItem
 {
-    public class TodoItem
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
 
-        [Required]
-        [MaxLength(255)]
-        public string? Name { get; set; }  
-        public bool IsCompleted { get; set; }  
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public int UserId { get; set; }  // Foreign key for the User table
-    }
+    public string Title { get; set; } = string.Empty;
+
+    public string? Name { get; set; } 
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public bool IsCompleted { get; set; }
+
+    public int UserId { get; set; }
+    public User? User { get; set; }
 }

@@ -31,13 +31,19 @@ namespace ToDoList.Controllers
 
             if (existingUser != null)
             {
-            return BadRequest($"{request.Username}Bu kullanıcı adı zaten kullanılıyor.");
+                return BadRequest("Bu kullanıcı adı zaten kullanılıyor.");
             }
+
+            // String role gönderildiyse çeviriyoruz
+            var parsedRole = Enum.TryParse<UserRole>(request.Role.ToString(), out var userRole)
+                ? userRole
+                : UserRole.User;
 
             var user = new User
             {
                 Username = request.Username,
-                Password = request.Password 
+                Password = request.Password,
+                Role = parsedRole
             };
 
             _context.Users.Add(user);
@@ -45,6 +51,7 @@ namespace ToDoList.Controllers
 
             return Ok("Kayıt başarılı");
         }
+
 
         [HttpGet("getAll")]
         public async Task<IActionResult> GetAll()
@@ -54,26 +61,30 @@ namespace ToDoList.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] UserDto request)
-        {
-            var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.Username == request.Username && u.Password == request.Password);
+public async Task<IActionResult> Login([FromBody] UserDto request)
+{
+    Console.WriteLine($"Gelen login: {request.Username} - {request.Password}");
 
-            if (user == null)
-            {
-                return Unauthorized("Kullanıcı adı veya şifre hatalı");
-            }
+    var user = await _context.Users
+        .FirstOrDefaultAsync(u => u.Username == request.Username && u.Password == request.Password);
 
-            var token = GenerateToken(user);
-            return Ok(new { token });
-        }
+    if (user == null)
+    {
+        Console.WriteLine("Kullanıcı bulunamadı!");
+        return Unauthorized("Kullanıcı adı veya şifre hatalı");
+    }
+
+    var token = GenerateToken(user);
+    return Ok(new { token });
+}
+
 
         private string GenerateToken(User user)
         {
             var claims = new[]
             {
                 new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Role, "User"),
+                new Claim(ClaimTypes.Role, user.Role.ToString()), // burası önemli
                 new Claim("userId", user.Id.ToString()) 
             };
 
@@ -92,6 +103,7 @@ namespace ToDoList.Controllers
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
 
     }
 }
